@@ -3,7 +3,6 @@ var statementCodeField = document.getElementById("statementCode");
 var body = document.getElementById("body");
 body.addEventListener("load", onLoad())
 
-
 function onLoad() {
     var ternary = "var valueBefore = true?'hallu':'ciao';";
     console.log(ternaryCodeField.innerHTML);
