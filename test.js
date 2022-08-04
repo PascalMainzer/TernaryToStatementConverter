@@ -142,6 +142,9 @@ function singleTernaryTest(string) {
     return result;
 }
 
+function alwaysTrueTest(string) {
+    return "";
+}
 
 function onLoad() {
     startP = document.getElementById("StartForTests");
@@ -153,6 +156,7 @@ function onLoad() {
     showTest(singleTernaryTest, " var    z=  c  ? 10: 20");
     showTest(singleTernaryTest, " c  ? 10: 20");
     showTest(singleTernaryTest, " alpha()  ? beta(): gamma()");
-    showTest(singleTernaryTest, " let z = c?d:e");
-    showTest(singleTernaryTest, " let z = (a&&b)?(a&&b):(a&&b)");
+    showTest(singleTernaryTest, " let z = true?d:e");
+    showTest(singleTernaryTest, "let z = (a&&b)?(a&&b):(a&&b)");
+    showTest(alwaysTrueTest, "true?a:b;");
 }
