@@ -24,15 +24,13 @@ function showTest(testFunction, testString) {
     startP = element;
 }
 
-
-
-function isTerminator(charToCheck) {
-    var lookUpVariableTerminator = " ?:=;"
-    for (let terminator = 0; terminator < lookUpVariableTerminator.length; terminator++) {
-        if (charToCheck == lookUpVariableTerminator[terminator]) {
+function charLookUp(charToCheck, lookUpString) {
+    for (let i = 0; i < lookUpString.length; i++) {
+        if (charToCheck == lookUpString[i]) {
             return true;
         }
     }
+    return false;
 }
 
 function findStart(string, wordBeforeVariable, wordLength) {
@@ -53,131 +51,278 @@ function findStart(string, wordBeforeVariable, wordLength) {
 }
 
 function findEnd(string, stringStart) {
-    for (let charPosition = stringStart; charPosition < string.length; charPosition++) {
-        if (isTerminator(string[charPosition])) {
-            return charPosition;
+    var lastPosition = string.length;
+    for (let i = stringStart; i < string.length; i++) {
+        if (charLookUp(string[i], "=;?:")) {
+            lastPosition = i;
+            break;
         }
     }
-}
 
-function getVariable(string, variableType) {
-    if (variableType != "") {
-        var variableStart = findStart(string, variableType + " ", 3);
-        var variableEnd = findEnd(string, variableStart);
-        return string.substring(variableStart, variableEnd);
+    for (let i = lastPosition - 1; i >= stringStart; i--) {
+        if (!charLookUp(string[i], " " + "=;?:")) {
+            lastPosition = i + 1;
+            break;
+        }
     }
 
-    return "";
+    return lastPosition;
 }
 
-function getCondition(string) {
-    var conditionStart;
 
-    conditionStart = findStart(string, "=", 1);
+function getCondition(string, isWholeTernary, returnOrVariable) {
+    function conditionFindStart(string) {
+        if (isWholeTernary) {
+            if (returnOrVariable == "return ") {
+                for (let i = 0; i < string.length; i++) {
+                    if (string.slice(i, i + 7) == "return ") {
+                        return i + 7;
+                    }
+                }
+            } else if (returnOrVariable != undefined) {
+                for (let i = 0; i < string.length; i++) {
+                    if (charLookUp(string[i], "=")) {
+                        return i + 1;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    function conditionFindEnd(string) {
+        for (let i = 0; i < string.length; i++) {
+            if (charLookUp(string[i], "?")) {
+                return i;
+            }
+        }
+    }
+    let conditionStart = conditionFindStart(string);
 
     if (conditionStart == -1) {
-        conditionStart = findStart(string, "", 0);
+        conditionStart = conditionFindStart(string);
     }
-    var conditionEnd = findEnd(string, conditionStart);
-    return string.substring(conditionStart, conditionEnd);
+
+    let conditionEnd = conditionFindEnd(string, conditionStart);
+
+    let result = string.substring(conditionStart, conditionEnd);
+    let cleanedResult = result.trim();
+
+    return cleanedResult;
 }
 
-function getTrue(string) {
-    var trueStart = findStart(string, "?", 1);
-    var trueEnd = findEnd(string, trueStart);
-    return string.substring(trueStart, trueEnd);
+
+
+
+function isTernary(string) {
+    for (let i = 0; i < string.length; i++) {
+        if (string[i] == "?") {
+            return true;
+        }
+    }
+    return false;
 }
 
-function getFalse(string) {
-    var falseStart = findStart(string, ":", 1);
-    var falseEnd = findEnd(string, falseStart);
-    return string.substring(falseStart, falseEnd);
+function getTrue(string, returnOrVariable) {
+    function trueFindEnd(string, start) {
+        ternaryCounter = 0;
+        for (let i = start; i < string.length; i++) {
+            if (charLookUp(string[i], "?")) {
+                ternaryCounter++;
+            }
+            if (charLookUp(string[i], ":")) {
+                if (ternaryCounter == 0) {
+                    return i;
+                }
+                ternaryCounter--;
+            }
+        }
+    }
+
+    let trueStart = findStart(string, "?", 1);
+    let trueEnd = trueFindEnd(string, trueStart);
+    let result = string.substring(trueStart, trueEnd);
+    let cleanedResult = result.trim();
+
+    cleanedResult = convertMultiTernary(cleanedResult, false, returnOrVariable);
+    return cleanedResult;
 }
 
-function getVariableType(string) {
-    var variableStart = findStart(string, "var ", 3);
-    if (variableStart != -1) {
-        return "var"
+
+
+function getFalse(string, returnOrVariable) {
+    function falseFindStart(string) {
+        ternaryCounter = 0;
+        for (let i = 0; i < string.length; i++) {
+            if (charLookUp(string[i], "?")) {
+                ternaryCounter++;
+            }
+            if (charLookUp(string[i], ":")) {
+                ternaryCounter--;
+                if (ternaryCounter == 0) {
+                    return i + 1;
+                }
+            }
+        }
     }
-    variableStart = findStart(string, "let ", 3);
-    if (variableStart != -1) {
-        return "let"
+
+    function falseFindEnd(string, start) {
+        ternaryCounter = 0;
+        for (let i = start; i < string.length; i++) {
+            if (charLookUp(string[i], "?")) {
+                ternaryCounter++;
+            }
+            if (charLookUp(string[i], ":")) {
+                ternaryCounter--;
+                if (ternaryCounter == 0) {
+                    return i;
+                }
+            }
+        }
     }
-    return "";
+
+    let falseStart = falseFindStart(string);
+    let falseEnd = string.length;
+    let result = string.substring(falseStart, falseEnd);
+    let cleanedResult = result.trim();
+    cleanedResult = convertMultiTernary(cleanedResult, false, returnOrVariable);
+    return cleanedResult;
+}
+
+
+function addTabs(string, amount) {
+    for (let i = 0; i < amount; i++) {
+        string += "\t";
+    }
+
+    return string;
+}
+
+function getReturnOrVariable(string) {
+    function getStart(type) {
+        for (let i = 0; i < string.length; i++) {
+            if (string[i] + string[i + 1] + string[i + 2] == type) {
+                return i + 3;
+            }
+        }
+        for (let i = start; i < string.length; i++) {
+            if (string[i] != " ") {
+                start = i;
+            }
+        }
+
+        return start;
+    }
+
+    function findEnd() {
+        for (let i = 0; i < string.length; i++) {
+            if (charLookUp(string[i], "=")) {
+                return i;
+            }
+        }
+    }
+
+    if (string.indexOf("return ") != -1) {
+        return "return ";
+    }
+    if (string.indexOf("let ") != -1) {
+        let start = getStart("let");
+        let end = findEnd();
+        let result = string.substring(start, end);
+        let cleanedResult = result.trim();
+        return cleanedResult + " = ";
+    }
+    if (string.indexOf("var ") != -1) {
+        let start = getStart("var");
+        let end = findEnd();
+        let result = string.substring(start, end);
+        let cleanedResult = result.trim();
+        return cleanedResult + " = ";
+    }
+}
+
+function convertMultiTernary(string, isWholeTernary, returnOrVariable) {
+    let lines = [];
+
+    if (isWholeTernary) {
+        returnOrVariable = getReturnOrVariable(string);
+    }
+
+    if (isTernary(string)) {
+        let conditionF = getCondition(string, isWholeTernary, returnOrVariable);
+
+        let trueF = getTrue(string, returnOrVariable);
+        let falseF = getFalse(string, returnOrVariable);
+
+
+        lines.push("if(" + conditionF + "){\n");
+
+        trueF.forEach(function(item, index, array) {
+            lines.push("\t" + item)
+        });
+
+
+        lines.push("}else{\n");
+
+
+        falseF.forEach(function(item, index, array) {
+            lines.push("\t" + item)
+        });
+
+        lines.push("}\n");
+    } else {
+        if (returnOrVariable == undefined) {
+            lines.push(string + ";\n");
+        } else {
+            lines.push(returnOrVariable + string + ";\n");
+        }
+
+    }
+
+    if (isWholeTernary) {
+        let result = "";
+
+        lines.forEach(function(item, index, array) {
+            result += item
+        });
+
+
+        return result;
+    }
+
+    return lines;
 }
 
 function singleTernaryTest(string) {
-    var result = "";
-    var variableType = getVariableType(string);
-
-    var variableF = getVariable(string, variableType);
-    if (variableF != "") {
-        result += variableType + " ";
-        result += variableF;
-        result += ";\n\n"
-    }
-
-    var conditionF = getCondition(string);
-    result += "if( "
-    result += conditionF;
-    result += " )"
-
-    var trueF = getTrue(string);
-    result += "{\n\t";
-    if (variableF != "") {
-        result += variableF + " = ";
-    }
-    result += trueF;
-    result += ";\n}";
-
-    var falseF = getFalse(string);
-    result += "else{\n\t";
-    if (variableF != "") {
-        result += variableF + " = ";
-    }
-    result += falseF;
-    result += ";\n}"
-    return result;
+    return convertTernary(string);
 }
 
 function alwaysTrueTest(string) {
-    var result = "";
-    var variableType = getVariableType(string);
-
-    var variableF = getVariable(string, variableType);
-    if (variableF != "") {
-        result += variableType + " ";
-        result += variableF;
-        result += ";\n\n"
-    }
-
-    var conditionF = getCondition(string);
-
-    result += "if( "
-    result += conditionF;
-    result += " )"
-
-    var trueF = getTrue(string);
-    result += "{\n\t";
-    if (variableF != "") {
-        result += variableF + " = ";
-    }
-    result += trueF;
-    result += ";\n}";
-
-    var falseF = getFalse(string);
-    result += "else{\n\t";
-    if (variableF != "") {
-        result += variableF + " = ";
-    }
-    result += falseF;
-    result += ";\n}"
-    return result;
+    return convertTernary(string);
 }
 
-function onLoad() {
-    startP = document.getElementById("StartForTests");
+function alwaysFalseTest(string) {
+    return convertTernary(string);
+}
 
+function multiTernaryTest(string) {
+    return convertMultiTernary(string, true, "return ");
+}
+
+function findEndTests() {
+    showTest(findEndTest, "a   ");
+    showTest(findEndTest, "a;   ");
+    showTest(findEndTest, " a;");
+    showTest(findEndTest, "abcd");
+    showTest(findEndTest, "abcd   ");
+    showTest(findEndTest, "abcd;");
+    showTest(findEndTest, ".abcd ;");
+    showTest(findEndTest, "ab,   cd;");
+    showTest(findEndTest, "(a && b)   ");
+    showTest(findEndTest, "a?b?c:d");
+}
+
+function singleTernaryTests() {
     showTest(singleTernaryTest, "var a = b?c:d");
     showTest(singleTernaryTest, "var z = c?d:e");
     showTest(singleTernaryTest, " var z = c?d:e");
@@ -186,6 +331,31 @@ function onLoad() {
     showTest(singleTernaryTest, " c  ? 10: 20");
     showTest(singleTernaryTest, "true  ? beta(): gamma()");
     showTest(singleTernaryTest, " let z = true?d:e");
-    showTest(singleTernaryTest, "let z = (a&&b)?(a&&b):(a&&b)");
+    showTest(singleTernaryTest, "let z = (a && b)?(a&&b):(a&&b)");
+    showTest(singleTernaryTest, "c ? km.saveNumber(20, ks) : ks");
+}
+
+function alwaysTrueTests() {
     showTest(alwaysTrueTest, "true?a:b;");
+    showTest(alwaysTrueTest, "var x = true?a:b;");
+}
+
+function alwaysFalseTests() {
+    showTest(alwaysFalseTest, "var x = false?a:b;");
+}
+
+function multiTernaryTests() {
+    showTest(multiTernaryTest, "kk ? window.webkit.messageHandlers.iosCommandA.postMessage('username' + c) : 12 <= kn ? (km.saveString(20, c), km.setState(10)) : 5 <= kn ? km.saveString(0, c) : (d4.zS(0, c), d4.zQ())");
+}
+
+function onLoad() {
+    startP = document.getElementById("StartForTests");
+
+    //findEndTests();
+    //singleTernaryTests();
+    //alwaysTrueTests();
+    //alwaysFalseTests();
+    multiTernaryTests();
+
+    var x = (true ? true : true) ? false : true;
 }

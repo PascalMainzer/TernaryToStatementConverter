@@ -6,11 +6,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body id="body">
-    <textarea readonly rows="20" cols="60" name="ternaryCode" id="ternaryCode"></textarea>
-    <textarea readonly rows="20" cols="60" name="statementCode" id="statementCode"></textarea>
+    <div>
+        <h1>input</h1>
+        <textarea rows="2" cols="150" name="ternaryCode" id="ternaryCode"></textarea>
+    </div>
+
+    <div>
+        <button id="Convert" onclick="onClick()">Convert</button>
+    </div>
+
+    <div>
+        <h1>output</h1>
+        <textarea readonly rows="40" cols="150" name="statementCode" id="statementCode"></textarea>
+    </div>
+
     <script src="converter.js"></script>
 </body>
 
