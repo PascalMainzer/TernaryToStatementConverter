@@ -6,7 +6,6 @@ body {
 
 div {
     width: 100%;
-    background-color: #00FF00;
 }
 
 textarea {
@@ -15,6 +14,10 @@ textarea {
     tab-size: 4;
     width: 100%;
     padding: 0mm;
+    border: none;
+    outline-style: solid;
+    outline-color: gray;
+    outline-width: 0.5mm;
 }
 
 button {

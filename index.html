@@ -11,7 +11,21 @@
 
 <body id="body">
     <div>
-        <h1>input</h1>
+        <h1>Ternary To Statement Converter (TTSC)</h1>
+        <p>
+            This tool was created with the purpose of assisting in reverse-engineering javascript code. More specifically the "decompression" of ternaries to statements.
+        </p>
+        <p>
+            To decrease the size of any javascript code, it is compressed using various techniques. The resulting code still works like the original, but less packets are needed to transmit it in a network. This leads to a more difficult time of understanding the
+            script though, as there is no indentation and no brackets.
+        </p>
+
+        <p>
+            This tool/function currently allows the accurate translation of nested and non-nested ternaries to statements. It even works with variables and return statements. There is only one thing which needs to be added: resolving brackets in a ternary statement.
+        </p>
+    </div>
+    <div>
+        <h1>Input (Ternary)</h1>
         <textarea rows="2" cols="150" name="ternaryCode" id="ternaryCode"></textarea>
     </div>
 
@@ -20,7 +34,7 @@
     </div>
 
     <div>
-        <h1>output</h1>
+        <h1>Output (Statement)</h1>
         <textarea readonly rows="40" cols="150" name="statementCode" id="statementCode"></textarea>
     </div>
 
