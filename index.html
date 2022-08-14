@@ -5,19 +5,40 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+
+
+    <title>JavaScript Ternary To Statement Converter</title>
+    <meta name="og:title" content="JavaScript Ternary To Statement Converter">
+    <meta property="og:type" content="website">
+
+    <meta name="og:url" content="https://pascalmainzer.github.io/TernaryToStatementConverter/">
+
+
+    <meta name="description" content="Converts ternaries like 'a?x:y'  to statements (if/else). Works with functions, variables and returns.
+    Reverse engineering javascript compression.">
+    <meta name="og:description" content="Converts ternaries like 'a?x:y'  to statements (if/else). Works with functions, variables and returns.
+    Reverse engineering javascript compression.">
+
+
+    <link rel="icon" href="TernaryToStatementConverter.png">
+    <meta name="og:image" content="TernaryToStatementConverterOG.png">
+    <meta name="og:image:alt" content="TernaryToStatementConverterLogo">
+
+    <link rel="canonical" href="https://pascalmainzer.github.io/TernaryToStatementConverter/">
+    <meta name="theme-color" content="ffffff">
     <link rel="stylesheet" href="style.css">
+
+
 </head>
 
 <body id="body">
     <div>
         <h1>Ternary To Statement Converter (TTSC)</h1>
         <p>
-            This tool was created with the purpose of assisting in reverse-engineering javascript code. More specifically the "decompression" of ternaries to statements.
+            This tool was created with the purpose of assisting in <a href="https://en.wikipedia.org/wiki/Reverse_engineering">reverse engineering</a> javascript code. More specifically the "decompression" of <a href="https://en.wikipedia.org/wiki/Ternary_operation#Computer_science">ternaries</a>            to statements.
         </p>
         <p>
-            To decrease the size of any javascript code, it is compressed using various techniques. The resulting code still works like the original, but less packets are needed to transmit it in a network. This leads to a more difficult time of understanding the
-            script though, as there is no indentation and no brackets.
+            To decrease the size of any javascript code, it is <a href="https://jscompress.com/">compressed</a> using various techniques. The resulting code still works like the original, but less <a href="https://en.wikipedia.org/wiki/Network_packet">packets</a>            are needed to transmit it in a network. This leads to a more difficult time of understanding the script though, as there is no indentation and no brackets.
         </p>
 
         <p>
@@ -25,18 +46,21 @@
         </p>
     </div>
     <div>
-        <h1>Input (Ternary)</h1>
-        <textarea rows="2" cols="150" name="ternaryCode" id="ternaryCode"></textarea>
+        <div>
+            <h1>Input (Ternary)</h1>
+            <textarea rows="2" cols="150" name="ternaryCode" id="ternaryCode"></textarea>
+        </div>
+
+        <div>
+            <button id="Convert" onclick="onClick()">Convert</button>
+        </div>
+
+        <div>
+            <h1>Output (Statement)</h1>
+            <textarea readonly rows="40" cols="150" name="statementCode" id="statementCode"></textarea>
+        </div>
     </div>
 
-    <div>
-        <button id="Convert" onclick="onClick()">Convert</button>
-    </div>
-
-    <div>
-        <h1>Output (Statement)</h1>
-        <textarea readonly rows="40" cols="150" name="statementCode" id="statementCode"></textarea>
-    </div>
 
     <script src="converter.js"></script>
 </body>
